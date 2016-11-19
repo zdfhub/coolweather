@@ -1,11 +1,22 @@
 package com.example.zdf.coolweather.util;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.example.zdf.coolweather.db.CoolWeatherDB;
 import com.example.zdf.coolweather.model.City;
 import com.example.zdf.coolweather.model.County;
 import com.example.zdf.coolweather.model.Province;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 /**
  * Created by zdf on 2016/11/18.
@@ -63,6 +74,48 @@ public class Utility {
             }
          }
         return false;
+    }
+    public static void handleWeatherResponse(Context context,String response){
+        try{
+            JSONObject jsonObject=new JSONObject(response);
+            JSONObject weatherInfo=jsonObject.getJSONObject("weatherinfo");
+            String cityName=weatherInfo.getString("city");
+            String temp1 = weatherInfo.getString("temp1");
+            String weatherCode = weatherInfo.getString("cityid");
+            String temp2 = weatherInfo.getString("temp2");
+            String weatherDesp = weatherInfo.getString("weather");
+            String publishTime = weatherInfo.getString("ptime");
+            saveWeatherInfo(context, cityName, weatherCode, temp1, temp2, weatherDesp, publishTime);
+
+            /*JSONObject jsonObject=new JSONObject(response);
+            JSONObject weatherInfo=jsonObject.getJSONObject("data");
+            JSONArray jsonArray=weatherInfo.getJSONArray("forecast");
+            JSONObject todayJson=jsonArray.getJSONObject(0);
+            String cityName=weatherInfo.getString("city");
+            String temp1 = todayJson.getString("high");
+            String weatherCode = null;
+            String temp2 = todayJson.getString("low");
+            String weatherDesp = todayJson.getString("type");
+            String publishTime = todayJson.getString("date");
+            saveWeatherInfo(context, cityName, weatherCode, temp1, temp2, weatherDesp, publishTime);*/
+
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+    public static void saveWeatherInfo(Context context, String cityName, String weatherCode, String temp1, String temp2, String weatherDesp, String publishTime) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy年M月d日", Locale.CHINA);
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+        editor.putBoolean("city_selected", true);
+        editor.putString("city_name", cityName);
+        editor.putString("weather_code", weatherCode);
+        editor.putString("temp1", temp1);
+        editor.putString("temp2", temp2);
+        editor.putString("weather_desp", weatherDesp);
+        editor.putString("publish_time", publishTime);
+        editor.putString("current_date", sdf.format(new Date()));
+        editor.commit();
     }
 
 
